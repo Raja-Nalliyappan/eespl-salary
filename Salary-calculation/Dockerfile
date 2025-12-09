@@ -1,27 +1,24 @@
-# Use the official .NET SDK image for building
+# Build Stage
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy csproj file and restore dependencies
-COPY *.csproj ./
+# Copy csproj and restore
+COPY Salary-calculation.csproj ./
 RUN dotnet restore
 
-# Copy all files and publish the project
+# Copy everything and publish
 COPY . .
 RUN dotnet publish -c Release -o /app/publish
 
-# Use the smaller runtime image for running the app
+# Runtime Stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 
-# Copy published files
 COPY --from=build /app/publish .
 
-# Expose port 8080 (Render default)
+# Render runs on port 8080
 EXPOSE 8080
-
-# Set ASP.NET Core port
 ENV ASPNETCORE_URLS=http://+:8080
 
-# Start the application
-ENTRYPOINT ["dotnet", "YourProject.dll"]
+# Start application
+ENTRYPOINT ["dotnet", "Salary-calculation.dll"]
